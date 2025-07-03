@@ -8,6 +8,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Table(name = "medicos")
+@Entity (name = "Medicos")
+
 // lombock -------------------
 
 @Getter                               // Genera de forma automaticas los getter en tiempo de compilacion
@@ -16,11 +19,10 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(of = "id")         // identifica que dos objectos son iguales si el id es igual
 //----------------------------------------------
 
-@Table(name = "medicos")
-@Entity (name = "Medicos")
+
 
 public class Medico {
-    @id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
@@ -30,7 +32,17 @@ public class Medico {
     @Enumerated(EnumType.STRING)
     private Especialidad especialidad;
 
-    @Embedded                                      ////Para que aparesca en la misma tabla que los datos del Medico
+    @Embedded                                      //Para que aparesca en la misma tabla que los datos del Medico
     private Direccion direccion;
+
+    public Medico(DatosRegistroMedido datos){
+
+       this.id = null;
+       this.nombre = datos.nombre();
+       this.email= datos.email();
+       this.documento = datos.documento();
+       this.especialidad = datos.especialidad();
+       this.direccion = new Direccion (datos.direccion());
+    }
 
 }
