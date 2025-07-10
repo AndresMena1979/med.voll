@@ -1,11 +1,9 @@
 package com.med.voll.api.controller;
 
 
+import com.med.voll.api.medico.DatosActualizacionMedico;
 import com.med.voll.api.medico.DatosListaMedico;
-import com.med.voll.api.paciente.DatosListaPaciente;
-import com.med.voll.api.paciente.DatosRegistroPaciente;
-import com.med.voll.api.paciente.Paciente;
-import com.med.voll.api.paciente.PacienteRepository;
+import com.med.voll.api.paciente.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -44,9 +42,36 @@ public class PacienteController {
   @GetMapping
   public Page<DatosListaPaciente> listar (@PageableDefault(size = 10, sort = {"nombre"}) Pageable paginacion) {
 
-    return repository.findAll(paginacion).map(DatosListaPaciente::new);
+   // return repository.findAll(paginacion).map(DatosListaPaciente::new);
+    return repository.findAllByActivoTrue(paginacion).map(DatosListaPaciente::new);    //Se crea el metodo findAllByActivoTrue que no existe en el repositorio JPA
 
   }
 
+  @Transactional  //Para poder modificar o agregar datos a la base de datos (Transactional de Spring)
+
+  @PutMapping     // Para actualizar datos en la base de datos
+
+  public void actualizar(@RequestBody @Valid DatosActualizacionPaciente datos) {
+
+    var paciente = repository.getReferenceById(datos.id());  // para obtener al medico de la base de datos
+
+    paciente.actualizarInformaciones(datos);
+
+// Ahora para actualizar los cambios en la base de datos, gracias al @Transactional, no hay necesidad de llamar repository.save
+
+
+  }
+  @Transactional
+  @DeleteMapping("/{id}")
+
+  public void eliminar(@PathVariable Long id) {   //@PathVariable indica que String id es mismo id del @DeleteMapping ("/{id}")
+
+    // repository.deleteById(id);                 // Borra el médico de la base de datos de forma fisica
+
+    var paciente = repository.getReferenceById(id);  // obtenermos el medico de la base de datos
+
+    paciente.eliminar();   // Se crea el metodo eliminar
+
+  }
 
 }
